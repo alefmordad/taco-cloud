@@ -7,9 +7,9 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import tacos.Ingredient;
-import tacos.Ingredient.Type;
-import tacos.Taco;
+import tacos.model.Ingredient;
+import tacos.model.Ingredient.Type;
+import tacos.model.Taco;
 
 import javax.validation.Valid;
 import java.util.Arrays;

@@ -6,11 +6,16 @@ import org.hibernate.validator.constraints.CreditCardNumber;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.Date;
 
 @Data
 public class Order {
 
-	// @NotBlank means trimmed value should have a positive length
+	private Long id;
+
+	private Date placedAt;
+
+	// NotBlank means trimmed value should have a positive length
 	@NotBlank(message = "Name is required")
 	private String name;
 
@@ -32,7 +37,7 @@ public class Order {
 	@Pattern(regexp = "^(0[1-9]|1[0-2])([/])([1-9][0-9])$", message = "Must be formatted MM/YY")
 	private String ccExpiration;
 
-	// @Digits for validation String with number value
+	// Digits is used for validation String with number value
 	@Digits(integer = 3, fraction = 0, message = "Invalid CVV")
 	private String ccCVV;
 

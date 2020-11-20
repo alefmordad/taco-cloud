@@ -33,10 +33,14 @@ public class JdbcTacoRepository implements TacoRepository {
 	}
 
 	private long saveTacoInfo(Taco taco) {
+		// jdbc update method does not return generated id
+		// so in case of need to get saved entity id, this is the way:
 		taco.setCreatedAt(new Date());
-		PreparedStatementCreator psc = new PreparedStatementCreatorFactory(
-				"insert into Taco (name, createdAt) values (?, ?)", Types.VARCHAR, Types.TIMESTAMP)
-				.newPreparedStatementCreator(asList(taco.getName(), new Timestamp(taco.getCreatedAt().getTime())));
+		PreparedStatementCreatorFactory pscFactory = new PreparedStatementCreatorFactory(
+				"insert into Taco (name, createdAt) values (?, ?)", Types.VARCHAR, Types.TIMESTAMP);
+		pscFactory.setReturnGeneratedKeys(true);
+		PreparedStatementCreator psc = pscFactory.newPreparedStatementCreator(
+				asList(taco.getName(), new Timestamp(taco.getCreatedAt().getTime())));
 		KeyHolder keyHolder = new GeneratedKeyHolder();
 		jdbc.update(psc, keyHolder);
 		return keyHolder.getKey().longValue();

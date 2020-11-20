@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import tacos.data.IngredientRepository;
+import tacos.data.TacoRepository;
 import tacos.model.Ingredient;
 import tacos.model.Ingredient.Type;
+import tacos.model.Order;
 import tacos.model.Taco;
 
 import javax.validation.Valid;
@@ -19,37 +19,57 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 
-// model attributes would accessible in th ${}
+// model attributes would accessible in th braces
 @Slf4j
 @Controller
 @RequestMapping("/design")
 @RequiredArgsConstructor
+// this means order is saved in session, and would not be renewed before @RequestMapping call
+// session is handled like this: session id would be passed to client by JSESSIONID cookie
+// and it would be passed to client in request headers
+@SessionAttributes("order")
 public class DesignTacoController {
 
 	private final IngredientRepository ingredientRepo;
+	private final TacoRepository tacoRepo;
 
-	@GetMapping
-	public String showDesignForm(Model model) {
-		initForm(model, new Taco());
-		return "design";
+	// when a controller method is annotated with @ModelAttribute
+	// it would be called before calling @RequestMapping methods and adds its output to Model
+	// it can also take Model as parameter and add attributes to it
+	@ModelAttribute(name = "order")
+	public Order order() {
+		return new Order();
 	}
 
-	@PostMapping
-	public String processDesign(@Valid Taco design, Errors errors, Model model) {
-		if (errors.hasErrors()) {
-			initForm(model, design);
-			return "design";
-		}
-		// save the taco design
-		log.info("Processing design: " + design);
-		return "redirect:/orders/current";
+	@ModelAttribute(name = "taco")
+	public Taco taco() {
+		return new Taco();
 	}
 
-	private void initForm(Model model, Taco taco) {
+	@ModelAttribute
+	public void initForm(Model model) {
 		List<Ingredient> ingredients = ingredientRepo.findAll();
 		Map<Type, List<Ingredient>> groupedByType = ingredients.stream().collect(groupingBy(Ingredient::getType));
 		groupedByType.keySet().forEach(type -> model.addAttribute(type.toString().toLowerCase(), groupedByType.get(type)));
-		model.addAttribute("taco", taco);
+	}
+
+	@GetMapping
+	public String showDesignForm() {
+		return "design";
+	}
+
+	// when a method parameter is annotated with @Valid
+	// jsr-303 validations would be checked for it and possible errors would be inside an Errors type parameter
+	//
+	// when a method parameter is annotated with @ModelAttribute
+	// it would be binding to corresponding attribute in Model
+	@PostMapping
+	public String processDesign(@Valid Taco design, Errors errors, @ModelAttribute Order order) {
+		if (errors.hasErrors())
+			return "design";
+		Taco saved = tacoRepo.save(design);
+		order.addDesign(saved);
+		return "redirect:/orders/current";
 	}
 
 }

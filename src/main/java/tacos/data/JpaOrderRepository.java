@@ -1,7 +1,7 @@
 package tacos.data;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import tacos.model.Order;
 
@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 @Repository
-public interface JpaOrderRepository extends CrudRepository<Order, Long> {
+public interface JpaOrderRepository extends JpaRepository<Order, Long> {
 
 	List<Order> findByDeliveryZip(String deliveryZip);
 

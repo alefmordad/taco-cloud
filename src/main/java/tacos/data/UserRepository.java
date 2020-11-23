@@ -2,8 +2,11 @@ package tacos.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import tacos.model.Ingredient;
+import tacos.model.User;
 
 @Repository
-public interface JpaIngredientRepository extends JpaRepository<Ingredient, String> {
+public interface UserRepository extends JpaRepository<User, Long> {
+
+	User findByUsername(String username);
+
 }
